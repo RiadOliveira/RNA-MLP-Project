@@ -27,21 +27,28 @@ public class NeuralNetwork {
         }
     }
 
-    private double getEpochResult() {
+    private double executeNetworkIteration() {
         double neuronsResult[] = null;
 
-        for(TrainingData trainingData : trainingDatas) {
-            layers.get(0).setNeuronsInputs(trainingData.getInputForTraining());
+        for(int ind=0 ; ind<layers.size() ; ind++) {
+            Layer layer = layers.get(ind);
 
-            for(int ind=0 ; ind<layers.size() ; ind++) {
-                Layer layer = layers.get(ind);
-
-                if(ind != 0) layer.setSameInputsForEachNeuron(neuronsResult);
-                neuronsResult = layer.getNeuronsResults();
-            }
+            if(ind != 0) layer.setSameInputsForEachNeuron(neuronsResult);
+            neuronsResult = layer.getNeuronsResults();
         }
 
         return neuronsResult[0];
+    }
+
+    private double getEpochResult() {
+        double iterationResult = 0d;
+
+        for(TrainingData trainingData : trainingDatas) {
+            layers.get(0).setNeuronsInputs(trainingData.getInputForTraining());
+            iterationResult = executeNetworkIteration();
+        }
+
+        return iterationResult;
     }
 
     private void initializeNewLayer(
