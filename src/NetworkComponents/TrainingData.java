@@ -21,7 +21,7 @@ public class TrainingData {
         {0, 0, 1, 0}
     };
 
-    private static final double NOT_RECOGNIZED_EXPECTED_RESULT = -1;
+    private static final double NOT_RECOGNIZED_EXPECTED_RESULT = 0.5;
     private static final double[][][] NOT_RECOGNIZED_INPUTS = new double[][][]{
         {
             {0, 1, 0, 0},

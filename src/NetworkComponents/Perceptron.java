@@ -1,5 +1,7 @@
 package NetworkComponents;
 
+import utils.UtilsFunctions;
+
 public class Perceptron {
     private double weights[];
     private double inputs[];
@@ -13,12 +15,24 @@ public class Perceptron {
         }
     }
 
-    private Double executeSumOfParsedInputs() {
-        Double result = 0d;
+    public void updateWeightsErrorsBasedOnFactor(
+        double factor, double networkLearningRate
+    ) {
+        for(int ind=0 ; ind<weights.length ; ind++) {
+            double iterationInput = inputs[ind];
+            double iterationWeight = weights[ind];
+
+            double weightError = factor*iterationInput;
+            weights[ind] = iterationWeight - networkLearningRate*weightError;
+        }
+    }
+
+    public double executeSumOfParsedInputs() {
+        double result = 0d;
 
         for(int ind=0 ; ind<inputs.length ; ind++) {
-            Double iterationWeight = weights[ind];
-            Double iterationInput = inputs[ind];
+            double iterationWeight = weights[ind];
+            double iterationInput = inputs[ind];
 
             result += iterationInput*iterationWeight;
         }
@@ -26,9 +40,9 @@ public class Perceptron {
         return result;
     }
 
-    public Double getActivationFunctionResult() {
-        Double sumOfParsedInputs = executeSumOfParsedInputs();
-        return sumOfParsedInputs;
+    public double getActivationFunctionResult() {
+        double sumOfParsedInputs = executeSumOfParsedInputs();
+        return UtilsFunctions.sigmoidFunction(sumOfParsedInputs);
     }
 
     public double[] getWeights() {

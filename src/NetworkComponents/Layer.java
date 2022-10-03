@@ -12,14 +12,32 @@ public class Layer {
         }
     }
 
+    public double[] getNeuronsResultsWithoutActivation() {
+        double results[] = new double[neurons.size()];
+        for(int ind=0 ; ind<neurons.size() ; ind++) {
+            results[ind] = neurons.get(ind).executeSumOfParsedInputs();
+        }
+
+        return results;
+    }
+
     public double[] getNeuronsResults() {
         double results[] = new double[neurons.size()];
-
         for(int ind=0 ; ind<neurons.size() ; ind++) {
             results[ind] = neurons.get(ind).getActivationFunctionResult();
         }
 
         return results;
+    }
+
+    public void handleUpdateNeuronsWeights(
+        double multiplicationFactor, double networkLearningRate
+    ) {
+        neurons.forEach(
+            neuron -> neuron.updateWeightsErrorsBasedOnFactor(
+                multiplicationFactor, networkLearningRate
+            )
+        );
     }
 
     public void setNeuronsInputs(double inputs[][]) {

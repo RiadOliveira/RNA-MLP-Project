@@ -2,10 +2,12 @@ package NetworkComponents;
 import java.util.ArrayList;
 import java.util.List;
 
+import utils.UtilsFunctions;
+
 public class NeuralNetwork {
     private TrainingData[] trainingDatas;
 
-    private final double LEARNING_RATE = 0.4;
+    private final double LEARNING_RATE = 0.40;
     private final double TOLERANCE_RATE = 0.10;
 
     private List<Layer> layers = new ArrayList<>();
@@ -23,7 +25,7 @@ public class NeuralNetwork {
         initializeNetworkLayers();
 
         for(int ind=0 ; ind<epochStopQuantity ; ind++) {
-            System.out.println(getEpochResult());
+            iterateThroughOneEpoch();
         }
     }
 
@@ -39,16 +41,64 @@ public class NeuralNetwork {
 
         return neuronsResult[0];
     }
+    
+    private double getErrorDerivativeRelatedToPredicted(
+        double desiredValue, double predictedValue
+    ) {
+        return predictedValue - desiredValue;
+    }
 
-    private double getEpochResult() {
-        double iterationResult = 0d;
+    private double getPredictedDerivativeRelatedToOutputSum(
+        double outputSum
+    ) {
+        double sigmoidResult = UtilsFunctions.sigmoidFunction(outputSum);
+        return sigmoidResult*(1 - sigmoidResult);
+    }
 
+    private void handleAdjustNeuronsWeights(double desiredValue, double predictedValue) {
+        double errorDerivativeRelatedToPredicted = getErrorDerivativeRelatedToPredicted(
+            desiredValue, predictedValue
+        );
+        double predictedDerivativeRelatedToOutputSum = getPredictedDerivativeRelatedToOutputSum(
+            layers.get(hiddenLayersQuantity).getNeuronsResultsWithoutActivation()[0]
+        );
+
+        double multiplicationFactor =
+            errorDerivativeRelatedToPredicted * predictedDerivativeRelatedToOutputSum;
+
+        layers.forEach(
+            layer -> layer.handleUpdateNeuronsWeights(multiplicationFactor, LEARNING_RATE)
+        );
+    }
+
+    private double getNetworkIterationError(
+        double desiredValue, double predictedValue
+    ) {
+        double parsedValuesDifference = Math.pow(desiredValue - predictedValue, 2);
+        return parsedValuesDifference/2;
+    }
+
+    private boolean networkIterationResultIsValidBasedOnToleranceRate(
+        double desiredValue, double predictedValue
+    ) {
+        double iterationError = getNetworkIterationError(desiredValue, predictedValue);
+        return iterationError <= TOLERANCE_RATE;
+    }
+
+    private void iterateThroughOneEpoch() {
         for(TrainingData trainingData : trainingDatas) {
             layers.get(0).setNeuronsInputs(trainingData.getInputForTraining());
-            iterationResult = executeNetworkIteration();
-        }
+            double predictedResult = executeNetworkIteration();
 
-        return iterationResult;
+            boolean iterationResultIsValid = networkIterationResultIsValidBasedOnToleranceRate(
+                trainingData.getExpectedResult(), predictedResult
+            );
+            if(!iterationResultIsValid) {
+                handleAdjustNeuronsWeights(
+                    trainingData.getExpectedResult(), predictedResult
+                );
+            }
+        }
     }
 
     private void initializeNewLayer(
