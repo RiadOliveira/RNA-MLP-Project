@@ -3,54 +3,66 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NeuralNetwork {
-    //Davi (2+1+2+1)
-    private final int FIRST_EXPECTED_RESULT = 6;
-
-    //Oliveira (1+2+1+2+1+1+2+1) = 11/3 = 4
-    private final int SECOND_EXPECTED_RESULT = 4;
+    private TrainingData[] trainingDatas;
 
     private final double LEARNING_RATE = 0.4;
     private final double TOLERANCE_RATE = 0.10;
-
-    private short epochIndex = 0;
-    private short epochStopQuantity = 0;
 
     private List<Layer> layers = new ArrayList<>();
     private int hiddenLayersQuantity;
     private int[] neuronsQuantityForEachHiddenLayer;
 
     public NeuralNetwork(int[] neuronsQuantityForEachHiddenLayer) {
+        this.trainingDatas = TrainingData.getDefaultTrainingData();
+
         this.hiddenLayersQuantity = neuronsQuantityForEachHiddenLayer.length;
         this.neuronsQuantityForEachHiddenLayer = neuronsQuantityForEachHiddenLayer;
     }
 
-    public void executeNetworkLearning(
-        List<Double> initialInputs, short epochStopQuantity
-    ) {
-        this.epochStopQuantity = epochStopQuantity;
-        initializeNetworkLayers(initialInputs);
+    public void executeNetworkLearning(int epochStopQuantity) {
+        initializeNetworkLayers();
+
+        for(int ind=0 ; ind<epochStopQuantity ; ind++) {
+            System.out.println(getEpochResult());
+        }
+    }
+
+    private double getEpochResult() {
+        double neuronsResult[] = null;
+
+        for(TrainingData trainingData : trainingDatas) {
+            layers.get(0).setNeuronsInputs(trainingData.getInputForTraining());
+
+            for(int ind=0 ; ind<layers.size() ; ind++) {
+                Layer layer = layers.get(ind);
+
+                if(ind != 0) layer.setSameInputsForEachNeuron(neuronsResult);
+                neuronsResult = layer.getNeuronsResults();
+            }
+        }
+
+        return neuronsResult[0];
     }
 
     private void initializeNewLayer(
-        int neuronsQuantity, List<Double> layerInitialInputs
+        int neuronsQuantity, int inputsQuantityForNeurons
     ) {
-        Layer createdLayer = new Layer(neuronsQuantity);
-        if(layerInitialInputs != null) {
-            createdLayer.setNeuronsInputs(layerInitialInputs);
-        }
-
+        Layer createdLayer = new Layer(neuronsQuantity, inputsQuantityForNeurons);
         layers.add(createdLayer);
     }
 
-    private void initializeNetworkLayers(List<Double> initialInputs) {
+    private void initializeNetworkLayers() {
         for(int ind=0 ; ind<hiddenLayersQuantity ; ind++) {
             initializeNewLayer(
                 neuronsQuantityForEachHiddenLayer[ind],
-                ind == 0 ? initialInputs : null
+                ind == 0 ? 4 : neuronsQuantityForEachHiddenLayer[ind - 1]
             );
         }
 
         //Output layer
-        initializeNewLayer(1, null);
+        int inputsQuantityForOutputLayer = neuronsQuantityForEachHiddenLayer[
+            neuronsQuantityForEachHiddenLayer.length - 1
+        ];
+        initializeNewLayer(1, inputsQuantityForOutputLayer);
     }
 }

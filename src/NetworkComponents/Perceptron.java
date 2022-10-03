@@ -1,21 +1,24 @@
 package NetworkComponents;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Perceptron {
-    private List<Double> weights = new ArrayList<>();
-    private List<Double> inputs = new ArrayList<>();
+    private double weights[];
+    private double inputs[];
 
-    public Perceptron() {
-        super();
+    public Perceptron(int inputsQuantity) {
+        weights = new double[inputsQuantity];
+        inputs = new double[inputsQuantity];
+
+        for(int ind=0 ; ind<inputsQuantity ; ind++) {
+            weights[ind] = 1;
+        }
     }
 
     private Double executeSumOfParsedInputs() {
         Double result = 0d;
 
-        for(int ind=0 ; ind<inputs.size() ; ind++) {
-            Double iterationWeight = weights.get(ind);
-            Double iterationInput = inputs.get(ind);
+        for(int ind=0 ; ind<inputs.length ; ind++) {
+            Double iterationWeight = weights[ind];
+            Double iterationInput = inputs[ind];
 
             result += iterationInput*iterationWeight;
         }
@@ -28,19 +31,19 @@ public class Perceptron {
         return sumOfParsedInputs;
     }
 
-    public List<Double> getWeights() {
+    public double[] getWeights() {
         return weights;
     }
 
-    public void setWeights(List<Double> weights) {
+    public void setWeights(double weights[]) {
         this.weights = weights;
     }
 
-    public List<Double> getInputs() {
+    public double[] getInputs() {
         return inputs;
     }
 
-    public void setInputs(List<Double> inputs) {
+    public void setInputs(double inputs[]) {
         this.inputs = inputs;
     }
 }
