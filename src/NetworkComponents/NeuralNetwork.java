@@ -41,48 +41,57 @@ public class NeuralNetwork {
 
         return neuronsResult[0];
     }
-    
-    private double getErrorDerivativeRelatedToPredicted(
-        double desiredValue, double predictedValue
-    ) {
-        return predictedValue - desiredValue;
+
+    private double getNetworkOutputLayerError(double desiredValue, double predictedValue) {
+        int outputLayerIndex = layers.size() - 1;
+        Layer outputLayer = layers.get(outputLayerIndex);
+
+        Perceptron neuron = outputLayer.getNeurons().get(0);
+        double valuesDifference = desiredValue - predictedValue;
+
+        return valuesDifference * UtilsFunctions.sigmoidDerivative(
+            neuron.getSumOfParsedInputs()
+        );
     }
 
-    private double getPredictedDerivativeRelatedToOutputSum(
-        double outputSum
+    private void handleAdjustNeuronsWeights(
+        double desiredValue, double predictedValue,
+        double networkError
     ) {
-        double sigmoidResult = UtilsFunctions.sigmoidFunction(outputSum);
-        return sigmoidResult*(1 - sigmoidResult);
-    }
+        int outputLayerIndex = layers.size() - 1;
+        
+        double layersNeuronErrors[][] = new double[layers.size()][];
+        layersNeuronErrors[outputLayerIndex] = new double[]{networkError};
+        int firstHiddenLayerIndex = outputLayerIndex-1;
 
-    private void handleAdjustNeuronsWeights(double desiredValue, double predictedValue) {
-        double errorDerivativeRelatedToPredicted = getErrorDerivativeRelatedToPredicted(
-            desiredValue, predictedValue
-        );
-        double predictedDerivativeRelatedToOutputSum = getPredictedDerivativeRelatedToOutputSum(
-            layers.get(hiddenLayersQuantity).getNeuronsResultsWithoutActivation()[0]
-        );
+        for(int ind=firstHiddenLayerIndex ; ind>=0 ; ind--) {
+            Layer iterationLayer = layers.get(ind);
+            Layer previousIterationLayer = layers.get(ind+1);
 
-        double multiplicationFactor =
-            errorDerivativeRelatedToPredicted * predictedDerivativeRelatedToOutputSum;
+            double iterationLayerNeuronsErrors[] = iterationLayer.getNeuronsErrors(
+                layersNeuronErrors[ind + 1],
+                previousIterationLayer.getNeurons()
+            );
 
-        layers.forEach(
-            layer -> layer.handleUpdateNeuronsWeights(multiplicationFactor, LEARNING_RATE)
-        );
+            layersNeuronErrors[ind] = iterationLayerNeuronsErrors;
+        }
+
+        for(int ind=0 ; ind<layers.size() ; ind++) {
+            layers.get(ind).handleUpdateWeightsOfNeurons(
+                layersNeuronErrors[ind], LEARNING_RATE
+            );
+        }
     }
 
     private double getNetworkIterationError(
         double desiredValue, double predictedValue
     ) {
-        double parsedValuesDifference = Math.pow(desiredValue - predictedValue, 2);
-        return parsedValuesDifference/2;
-    }
+        double outputLayerError = getNetworkOutputLayerError(
+            desiredValue, predictedValue
+        );
 
-    private boolean networkIterationResultIsValidBasedOnToleranceRate(
-        double desiredValue, double predictedValue
-    ) {
-        double iterationError = getNetworkIterationError(desiredValue, predictedValue);
-        return iterationError <= TOLERANCE_RATE;
+        double parsedValuesDifference = Math.pow(outputLayerError, 2);
+        return parsedValuesDifference/2;
     }
 
     private void iterateThroughOneEpoch() {
@@ -90,12 +99,13 @@ public class NeuralNetwork {
             layers.get(0).setNeuronsInputs(trainingData.getInputForTraining());
             double predictedResult = executeNetworkIteration();
 
-            boolean iterationResultIsValid = networkIterationResultIsValidBasedOnToleranceRate(
+            double networkError = getNetworkIterationError(
                 trainingData.getExpectedResult(), predictedResult
             );
-            if(!iterationResultIsValid) {
+            if(networkError > TOLERANCE_RATE) {
                 handleAdjustNeuronsWeights(
-                    trainingData.getExpectedResult(), predictedResult
+                    trainingData.getExpectedResult(), predictedResult,
+                    networkError
                 );
             }
         }

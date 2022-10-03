@@ -3,6 +3,8 @@ package NetworkComponents;
 import java.util.ArrayList;
 import java.util.List;
 
+import utils.UtilsFunctions;
+
 public class Layer {
     private List<Perceptron> neurons = new ArrayList<>();
 
@@ -15,7 +17,7 @@ public class Layer {
     public double[] getNeuronsResultsWithoutActivation() {
         double results[] = new double[neurons.size()];
         for(int ind=0 ; ind<neurons.size() ; ind++) {
-            results[ind] = neurons.get(ind).executeSumOfParsedInputs();
+            results[ind] = neurons.get(ind).getSumOfParsedInputs();
         }
 
         return results;
@@ -30,14 +32,84 @@ public class Layer {
         return results;
     }
 
-    public void handleUpdateNeuronsWeights(
-        double multiplicationFactor, double networkLearningRate
+    public double getErrorOfOutputLayerNeuron(
+        double desiredValue, double predictedValue
     ) {
-        neurons.forEach(
-            neuron -> neuron.updateWeightsErrorsBasedOnFactor(
-                multiplicationFactor, networkLearningRate
-            )
+        Perceptron neuron = neurons.get(0);
+        double valuesDifference = desiredValue - predictedValue;
+
+        return valuesDifference * UtilsFunctions.sigmoidDerivative(
+            neuron.getSumOfParsedInputs()
         );
+    }
+
+    private double getNeuronErrorAdditionalBasedOnPreviousErrorsAndWeights(
+        double previousLayerNeuronsErrors[],
+        List<Perceptron> previousNeurons,
+        int currentNeuronIndex
+    ) {
+        double additionalError = 0;
+        for(
+            int previousNeuronsInd=0 ;
+            previousNeuronsInd<previousNeurons.size() ;
+            previousNeuronsInd++
+        ) {
+            Perceptron iterationPreviousNeuron =
+                previousNeurons.get(previousNeuronsInd);
+            double previousNeuronWeightRelatedToIterationNeuron =
+                iterationPreviousNeuron.getWeights()[currentNeuronIndex];
+
+            double iterationPreviousNeuronError = 
+                previousLayerNeuronsErrors[previousNeuronsInd];
+
+            additionalError +=
+                iterationPreviousNeuronError*
+                previousNeuronWeightRelatedToIterationNeuron;
+        }
+
+        return additionalError;
+    }
+
+    public double[] getNeuronsErrors(
+        double previousLayerNeuronsErrors[],
+        List<Perceptron> previousNeurons
+    ) {
+        double neuronsErrors[] = new double[neurons.size()];
+
+        for(int neuronInd=0 ; neuronInd<neurons.size() ; neuronInd++) {
+            Perceptron iterationNeuron = neurons.get(neuronInd);
+            double neuronErrorResult = UtilsFunctions.sigmoidDerivative(
+                iterationNeuron.getSumOfParsedInputs()
+            );
+            
+            neuronErrorResult *= 
+                getNeuronErrorAdditionalBasedOnPreviousErrorsAndWeights(
+                    previousLayerNeuronsErrors, previousNeurons,
+                    neuronInd
+                );
+            neuronsErrors[neuronInd] = neuronErrorResult;
+        }
+
+        return neuronsErrors;
+    }
+
+    public void handleUpdateWeightsOfNeurons(
+        double errors[], double learningRate
+    ) {
+        for(int neuronsInd=0 ; neuronsInd<neurons.size() ; neuronsInd++) {
+            Perceptron neuron = neurons.get(neuronsInd);
+
+            double neuronWeights[] = neuron.getWeights();
+            double neuronInputs[] = neuron.getInputs();
+    
+            for(int weightsInd=0 ; weightsInd<neuronWeights.length ; weightsInd++) {
+                double iterationWeight = neuronWeights[weightsInd];
+                double iterationInput = neuronInputs[weightsInd];
+    
+                neuronWeights[weightsInd] = 
+                    iterationWeight + learningRate*errors[neuronsInd]*iterationInput;
+            }
+        }
     }
 
     public void setNeuronsInputs(double inputs[][]) {
@@ -48,5 +120,9 @@ public class Layer {
 
     public void setSameInputsForEachNeuron(double inputs[]) {
         neurons.forEach(neuron -> neuron.setInputs(inputs));
+    }
+
+    public List<Perceptron> getNeurons() {
+        return neurons;
     }
 }

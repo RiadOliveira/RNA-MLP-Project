@@ -11,7 +11,8 @@ public class Perceptron {
         inputs = new double[inputsQuantity];
 
         for(int ind=0 ; ind<inputsQuantity ; ind++) {
-            weights[ind] = 1;
+            double generatedValue = Math.random();
+            weights[ind] = ind % 2 == 0 ? generatedValue : -generatedValue;
         }
     }
 
@@ -27,7 +28,7 @@ public class Perceptron {
         }
     }
 
-    public double executeSumOfParsedInputs() {
+    public double getSumOfParsedInputs() {
         double result = 0d;
 
         for(int ind=0 ; ind<inputs.length ; ind++) {
@@ -41,7 +42,7 @@ public class Perceptron {
     }
 
     public double getActivationFunctionResult() {
-        double sumOfParsedInputs = executeSumOfParsedInputs();
+        double sumOfParsedInputs = getSumOfParsedInputs();
         return UtilsFunctions.sigmoidFunction(sumOfParsedInputs);
     }
 
