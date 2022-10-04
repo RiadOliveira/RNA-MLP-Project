@@ -3,37 +3,37 @@ package networkComponents;
 import utils.UtilsFunctions;
 
 public class Perceptron {
-    private double weights[];
-    private double inputs[];
+    private float weights[];
+    private float inputs[];
 
     public Perceptron(int inputsQuantity) {
-        weights = new double[inputsQuantity];
-        inputs = new double[inputsQuantity];
+        weights = new float[inputsQuantity];
+        inputs = new float[inputsQuantity];
 
         for(int ind=0 ; ind<inputsQuantity ; ind++) {
-            double generatedValue = Math.abs(Math.random() - 0.5);
+            float generatedValue = (float) Math.abs(Math.random() - 0.5);
             weights[ind] = ind % 2 == 0 ? generatedValue : -generatedValue;
         }
     }
 
     public void updateWeightsErrorsBasedOnFactor(
-        double factor, double networkLearningRate
+        float factor, float networkLearningRate
     ) {
         for(int ind=0 ; ind<weights.length ; ind++) {
-            double iterationInput = inputs[ind];
-            double iterationWeight = weights[ind];
+            float iterationInput = inputs[ind];
+            float iterationWeight = weights[ind];
 
-            double weightError = factor*iterationInput;
+            float weightError = factor*iterationInput;
             weights[ind] = iterationWeight - networkLearningRate*weightError;
         }
     }
 
-    public double getSumOfParsedInputs() {
-        double result = 0d;
+    public float getSumOfParsedInputs() {
+        float result = 0f;
 
         for(int ind=0 ; ind<inputs.length ; ind++) {
-            double iterationWeight = weights[ind];
-            double iterationInput = inputs[ind];
+            float iterationWeight = weights[ind];
+            float iterationInput = inputs[ind];
 
             result += iterationInput*iterationWeight;
         }
@@ -41,24 +41,24 @@ public class Perceptron {
         return result;
     }
 
-    public double getActivationFunctionResult() {
-        double sumOfParsedInputs = getSumOfParsedInputs();
+    public float getActivationFunctionResult() {
+        float sumOfParsedInputs = getSumOfParsedInputs();
         return UtilsFunctions.activationFunction(sumOfParsedInputs);
     }
 
-    public double[] getWeights() {
+    public float[] getWeights() {
         return weights;
     }
 
-    public void setWeights(double weights[]) {
+    public void setWeights(float weights[]) {
         this.weights = weights;
     }
 
-    public double[] getInputs() {
+    public float[] getInputs() {
         return inputs;
     }
 
-    public void setInputs(double inputs[]) {
+    public void setInputs(float inputs[]) {
         this.inputs = inputs;
     }
 }

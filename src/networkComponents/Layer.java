@@ -14,8 +14,8 @@ public class Layer {
         }
     }
 
-    public double[] getNeuronsResultsWithoutActivation() {
-        double results[] = new double[neurons.size()];
+    public float[] getNeuronsResultsWithoutActivation() {
+        float results[] = new float[neurons.size()];
         for(int ind=0 ; ind<neurons.size() ; ind++) {
             results[ind] = neurons.get(ind).getSumOfParsedInputs();
         }
@@ -23,8 +23,8 @@ public class Layer {
         return results;
     }
 
-    public double[] getNeuronsResults() {
-        double results[] = new double[neurons.size()];
+    public float[] getNeuronsResults() {
+        float results[] = new float[neurons.size()];
         for(int ind=0 ; ind<neurons.size() ; ind++) {
             results[ind] = neurons.get(ind).getActivationFunctionResult();
         }
@@ -32,23 +32,23 @@ public class Layer {
         return results;
     }
 
-    public double getErrorOfOutputLayerNeuron(
-        double desiredValue, double predictedValue
+    public float getErrorOfOutputLayerNeuron(
+        float desiredValue, float predictedValue
     ) {
         Perceptron neuron = neurons.get(0);
-        double valuesDifference = desiredValue - predictedValue;
+        float valuesDifference = desiredValue - predictedValue;
 
         return valuesDifference * UtilsFunctions.activationFunctionDerivative(
             neuron.getSumOfParsedInputs()
         );
     }
 
-    private double getNeuronErrorAdditionalBasedOnPreviousErrorsAndWeights(
-        double previousLayerNeuronsErrors[],
+    private float getNeuronErrorAdditionalBasedOnPreviousErrorsAndWeights(
+        float previousLayerNeuronsErrors[],
         List<Perceptron> previousNeurons,
         int currentNeuronIndex
     ) {
-        double additionalError = 0;
+        float additionalError = 0;
         for(
             int previousNeuronsInd=0 ;
             previousNeuronsInd<previousNeurons.size() ;
@@ -56,10 +56,10 @@ public class Layer {
         ) {
             Perceptron iterationPreviousNeuron =
                 previousNeurons.get(previousNeuronsInd);
-            double previousNeuronWeightRelatedToIterationNeuron =
+            float previousNeuronWeightRelatedToIterationNeuron =
                 iterationPreviousNeuron.getWeights()[currentNeuronIndex];
 
-            double iterationPreviousNeuronError = 
+            float iterationPreviousNeuronError = 
                 previousLayerNeuronsErrors[previousNeuronsInd];
 
             additionalError +=
@@ -70,15 +70,15 @@ public class Layer {
         return additionalError;
     }
 
-    public double[] getNeuronsErrors(
-        double previousLayerNeuronsErrors[],
+    public float[] getNeuronsErrors(
+        float previousLayerNeuronsErrors[],
         List<Perceptron> previousNeurons
     ) {
-        double neuronsErrors[] = new double[neurons.size()];
+        float neuronsErrors[] = new float[neurons.size()];
 
         for(int neuronInd=0 ; neuronInd<neurons.size() ; neuronInd++) {
             Perceptron iterationNeuron = neurons.get(neuronInd);
-            double neuronErrorResult = UtilsFunctions.activationFunctionDerivative(
+            float neuronErrorResult = UtilsFunctions.activationFunctionDerivative(
                 iterationNeuron.getSumOfParsedInputs()
             );
             
@@ -94,17 +94,17 @@ public class Layer {
     }
 
     public void handleUpdateWeightsOfNeurons(
-        double errors[], double learningRate
+        float errors[], float learningRate
     ) {
         for(int neuronsInd=0 ; neuronsInd<neurons.size() ; neuronsInd++) {
             Perceptron neuron = neurons.get(neuronsInd);
 
-            double neuronWeights[] = neuron.getWeights();
-            double neuronInputs[] = neuron.getInputs();
+            float neuronWeights[] = neuron.getWeights();
+            float neuronInputs[] = neuron.getInputs();
     
             for(int weightsInd=0 ; weightsInd<neuronWeights.length ; weightsInd++) {
-                double iterationWeight = neuronWeights[weightsInd];
-                double iterationInput = neuronInputs[weightsInd];
+                float iterationWeight = neuronWeights[weightsInd];
+                float iterationInput = neuronInputs[weightsInd];
     
                 neuronWeights[weightsInd] = 
                     iterationWeight + learningRate*errors[neuronsInd]*iterationInput;
@@ -112,13 +112,13 @@ public class Layer {
         }
     }
 
-    public void setNeuronsInputs(double inputs[][]) {
+    public void setNeuronsInputs(float inputs[][]) {
         for(int ind=0 ; ind<inputs.length ; ind++) {
             neurons.get(ind).setInputs(inputs[ind]);
         }
     }
 
-    public void setSameInputsForEachNeuron(double inputs[]) {
+    public void setSameInputsForEachNeuron(float inputs[]) {
         neurons.forEach(neuron -> neuron.setInputs(inputs));
     }
 

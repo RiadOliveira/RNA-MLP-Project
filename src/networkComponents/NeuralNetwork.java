@@ -5,10 +5,10 @@ import java.util.List;
 import utils.UtilsFunctions;
 
 public class NeuralNetwork {
-    private TrainingData[] trainingDatas;
+    private List<TrainingData> trainingDatas;
 
-    private final double LEARNING_RATE = 0.40;
-    private final double TOLERANCE_RATE = 0.10;
+    private final float LEARNING_RATE = 0.40f;
+    private final float TOLERANCE_RATE = 0.005f;
 
     private List<Layer> layers = new ArrayList<>();
     private int hiddenLayersQuantity;
@@ -27,10 +27,12 @@ public class NeuralNetwork {
         for(int ind=0 ; ind<epochStopQuantity ; ind++) {
             boolean hasLearned = iterateThroughOneEpochAndVerifyIfHasLearned(false);
 
-            if(hasLearned) {
-                iterateThroughOneEpochAndVerifyIfHasLearned(true);
+            if(hasLearned || ind == epochStopQuantity - 1) {
+                System.out.println("Últimos valores obtidos pela rede:");
                 System.out.println();
-
+                iterateThroughOneEpochAndVerifyIfHasLearned(true);
+                
+                System.out.println();
                 System.out.println(
                     "A rede " + (!hasLearned ? "não " : "") +
                     "aprendeu com " + (ind+1) + " épocas, " +
@@ -38,23 +40,62 @@ public class NeuralNetwork {
                     ", taxa de aprendizado de " + LEARNING_RATE + " e tolerância de " +
                     TOLERANCE_RATE + "." 
                 );
+                System.out.println();
                 break;
             }
         }
     }
 
-    public double verifyNetworkResultForInput(double input[][]) {
+    private NeuralNetworkResult getNetworkResultBasedOnPredictedValue(
+        float predictedValue
+    ) {
+        float differenceInRelationToFirstResult = 
+            Math.abs(predictedValue - TrainingData.FIRST_EXPECTED_RESULT);
+        float differenceInRelationToSecondResult = 
+            Math.abs(predictedValue - TrainingData.SECOND_EXPECTED_RESULT);
+        float differenceInRelationToNotRecognizedResult = 
+            Math.abs(predictedValue - TrainingData.NOT_RECOGNIZED_EXPECTED_RESULT);
+
+        float lowerDifferenceBetweenFirstAndSecondResults = 
+            Math.min(differenceInRelationToFirstResult, differenceInRelationToSecondResult);
+
+        float lowerDifferenceBetweenAllResults = Math.min(
+            lowerDifferenceBetweenFirstAndSecondResults,
+            differenceInRelationToNotRecognizedResult
+        );
+
+        if(lowerDifferenceBetweenAllResults == differenceInRelationToFirstResult) {
+            return NeuralNetworkResult.FIRST_EXPECTED_VALUE;
+        }
+
+        if(lowerDifferenceBetweenAllResults == differenceInRelationToSecondResult) {
+            return NeuralNetworkResult.SECOND_EXPECTED_VALUE;
+        }
+
+        return NeuralNetworkResult.VALUE_NOT_RECOGNIZED;
+    }
+
+    public void showNetworkResultForInput(float input[][]) {
         if(layers.size() == 0) {
             System.out.println("A Rede não foi treinada!");
-            return 0;
+            return;
         }
 
         layers.get(0).setNeuronsInputs(input);
-        return getNetworkIterationPredictedResult();
+        float predictedValue = getNetworkIterationPredictedValue();
+        NeuralNetworkResult networkResult = getNetworkResultBasedOnPredictedValue(
+            predictedValue
+        );
+        
+        System.out.println(
+            "O resultado previsto pela rede, para esta entrada foi de: " +
+            predictedValue + ", o qual se encontra mais próximo do resultado: " +
+            networkResult
+        );
     }
 
-    private double getNetworkIterationPredictedResult() {
-        double neuronsResult[] = null;
+    private float getNetworkIterationPredictedValue() {
+        float neuronsResult[] = null;
 
         for(int ind=0 ; ind<layers.size() ; ind++) {
             Layer layer = layers.get(ind);
@@ -66,12 +107,12 @@ public class NeuralNetwork {
         return neuronsResult[0];
     }
 
-    private double getNetworkOutputLayerError(double desiredValue, double predictedValue) {
+    private float getNetworkOutputLayerError(float desiredValue, float predictedValue) {
         int outputLayerIndex = layers.size() - 1;
         Layer outputLayer = layers.get(outputLayerIndex);
 
         Perceptron neuron = outputLayer.getNeurons().get(0);
-        double valuesDifference = desiredValue - predictedValue;
+        float valuesDifference = desiredValue - predictedValue;
 
         return valuesDifference * UtilsFunctions.activationFunctionDerivative(
             neuron.getSumOfParsedInputs()
@@ -79,37 +120,31 @@ public class NeuralNetwork {
     }
 
     private void handleAdjustNeuronsWeights(
-        double networkOutputLayerError
+        float networkOutputLayerError
     ) {
         int outputLayerIndex = layers.size() - 1;
-        
-        double layersNeuronErrors[][] = new double[layers.size()][];
-        layersNeuronErrors[outputLayerIndex] = new double[]{networkOutputLayerError};
-        int firstHiddenLayerIndex = outputLayerIndex-1;
+        float previousLayerNeuronsErrors[] = new float[]{networkOutputLayerError};
 
-        for(int ind=firstHiddenLayerIndex ; ind>=0 ; ind--) {
+        for(int ind=outputLayerIndex-1 ; ind>=0 ; ind--) {
             Layer iterationLayer = layers.get(ind);
             Layer previousIterationLayer = layers.get(ind+1);
 
-            double iterationLayerNeuronsErrors[] = iterationLayer.getNeuronsErrors(
-                layersNeuronErrors[ind + 1],
+            float iterationLayerNeuronsErrors[] = iterationLayer.getNeuronsErrors(
+                previousLayerNeuronsErrors,
                 previousIterationLayer.getNeurons()
             );
-
-            layersNeuronErrors[ind] = iterationLayerNeuronsErrors;
-        }
-
-        for(int ind=0 ; ind<layers.size() ; ind++) {
-            layers.get(ind).handleUpdateWeightsOfNeurons(
-                layersNeuronErrors[ind], LEARNING_RATE
+            previousIterationLayer.handleUpdateWeightsOfNeurons(
+                previousLayerNeuronsErrors, LEARNING_RATE
             );
+
+            previousLayerNeuronsErrors = iterationLayerNeuronsErrors;
         }
     }
 
-    private double getNetworkIterationError(
-        double networkOutputLayerError
+    private float getNetworkIterationError(
+        float networkOutputLayerError
     ) {
-        double parsedValuesDifference = Math.pow(networkOutputLayerError, 2);
+        float parsedValuesDifference = (float) Math.pow(networkOutputLayerError, 2);
         return parsedValuesDifference/2;
     }
 
@@ -118,12 +153,12 @@ public class NeuralNetwork {
 
         for(TrainingData trainingData : trainingDatas) {
             layers.get(0).setNeuronsInputs(trainingData.getInputForTraining());
-            double predictedResult = getNetworkIterationPredictedResult();
+            float predictedResult = getNetworkIterationPredictedValue();
 
-            double networkOutputLayerError = getNetworkOutputLayerError(
+            float networkOutputLayerError = getNetworkOutputLayerError(
                 trainingData.getExpectedResult(), predictedResult
             );
-            double networkError = getNetworkIterationError(
+            float networkError = getNetworkIterationError(
                 networkOutputLayerError
             );
             if(networkError > TOLERANCE_RATE) {

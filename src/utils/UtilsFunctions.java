@@ -1,9 +1,9 @@
 package utils;
 
 public class UtilsFunctions {
-    public static final ActivationFunction ACTIVATION_FUNCTION_SELECTED = ActivationFunction.LINEAR;
+    public static final ActivationFunction ACTIVATION_FUNCTION_SELECTED = ActivationFunction.HYPERBOLIC_TANGENT;
 
-    public static double activationFunction(double x) {
+    public static float activationFunction(float x) {
         switch(ACTIVATION_FUNCTION_SELECTED) {
             case LINEAR: return linearFunction(x);
             case LOGISTICS: return logisticsFunction(x);
@@ -12,7 +12,7 @@ public class UtilsFunctions {
         }
     }
 
-    public static double activationFunctionDerivative(double x) {
+    public static float activationFunctionDerivative(float x) {
         switch(ACTIVATION_FUNCTION_SELECTED) {
             case LINEAR: return linearDerivative(x);
             case LOGISTICS: return logisticsDerivative(x);
@@ -21,32 +21,33 @@ public class UtilsFunctions {
         }
     }
 
-    private static double linearFunction(double x) {
+    private static float linearFunction(float x) {
         return x;
     }
 
-    private static double linearDerivative(double x) {
+    private static float linearDerivative(float x) {
         return 1;
     }
 
-    private static double logisticsFunction(double x) {
-        double eulerComponent = Math.pow(Math.E, -x);
+    private static float logisticsFunction(float x) {
+        float eulerComponent = (float) Math.pow(Math.E, -x);
         return 1/(1 + eulerComponent);
     }
 
-    private static double logisticsDerivative(double x) {
-        double numeratorValue = Math.pow(Math.E, -x);
-        double denominatorValue = Math.pow(1 + numeratorValue, 2);
+    private static float logisticsDerivative(float x) {
+        float numeratorValue = (float) Math.pow(Math.E, -x);
+        float denominatorValue = (float) Math.pow(1 + numeratorValue, 2);
 
         return numeratorValue/denominatorValue;
     }
 
-    private static double hyperbolicTangentFunction(double x) {
-        double eulerComponent = Math.pow(Math.E, -2*x);
+    private static float hyperbolicTangentFunction(float x) {
+        float eulerComponent = (float) Math.pow(Math.E, -2*x);
         return (1 - eulerComponent)/(1 + eulerComponent);
     }
 
-    private static double hyperbolicTangentDerivative(double x) {
-        return 1 - Math.pow(hyperbolicTangentFunction(x), 2);
+    private static float hyperbolicTangentDerivative(float x) {
+        float hyperbolicTangentResult = (float) Math.pow(hyperbolicTangentFunction(x), 2);
+        return 1 - hyperbolicTangentResult;
     }
 }
