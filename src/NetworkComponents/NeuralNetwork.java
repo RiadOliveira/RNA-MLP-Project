@@ -5,7 +5,7 @@ import java.util.List;
 import utils.UtilsFunctions;
 
 public class NeuralNetwork {
-    private TrainingData[] trainingDatas;
+    private List<TrainingData> trainingDatas;
 
     private final double LEARNING_RATE = 0.40;
     private final double TOLERANCE_RATE = 0.10;
@@ -124,6 +124,8 @@ public class NeuralNetwork {
             if(showEpochResults) {
                 System.out.println(
                     "Valor esperado: " + trainingData.getExpectedResult() +
+                    " | Valor representado pelo esperado: " +
+                    trainingData.getParsedExpectedResult() +
                     " | Valor obtido: " + predictedResult
                 );
             }
