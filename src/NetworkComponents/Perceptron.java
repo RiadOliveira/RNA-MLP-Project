@@ -43,7 +43,7 @@ public class Perceptron {
 
     public double getActivationFunctionResult() {
         double sumOfParsedInputs = getSumOfParsedInputs();
-        return UtilsFunctions.sigmoidFunction(sumOfParsedInputs);
+        return UtilsFunctions.activationFunction(sumOfParsedInputs);
     }
 
     public double[] getWeights() {

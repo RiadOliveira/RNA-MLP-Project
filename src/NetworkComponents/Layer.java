@@ -38,7 +38,7 @@ public class Layer {
         Perceptron neuron = neurons.get(0);
         double valuesDifference = desiredValue - predictedValue;
 
-        return valuesDifference * UtilsFunctions.sigmoidDerivative(
+        return valuesDifference * UtilsFunctions.activationFunctionDerivative(
             neuron.getSumOfParsedInputs()
         );
     }
@@ -78,7 +78,7 @@ public class Layer {
 
         for(int neuronInd=0 ; neuronInd<neurons.size() ; neuronInd++) {
             Perceptron iterationNeuron = neurons.get(neuronInd);
-            double neuronErrorResult = UtilsFunctions.sigmoidDerivative(
+            double neuronErrorResult = UtilsFunctions.activationFunctionDerivative(
                 iterationNeuron.getSumOfParsedInputs()
             );
             

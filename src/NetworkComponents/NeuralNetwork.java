@@ -8,7 +8,7 @@ public class NeuralNetwork {
     private TrainingData[] trainingDatas;
 
     private final double LEARNING_RATE = 0.40;
-    private final double TOLERANCE_RATE = 0.10;
+    private final double TOLERANCE_RATE = 0.00001;
 
     private List<Layer> layers = new ArrayList<>();
     private int hiddenLayersQuantity;
@@ -49,19 +49,18 @@ public class NeuralNetwork {
         Perceptron neuron = outputLayer.getNeurons().get(0);
         double valuesDifference = desiredValue - predictedValue;
 
-        return valuesDifference * UtilsFunctions.sigmoidDerivative(
+        return valuesDifference * UtilsFunctions.activationFunctionDerivative(
             neuron.getSumOfParsedInputs()
         );
     }
 
     private void handleAdjustNeuronsWeights(
-        double desiredValue, double predictedValue,
-        double networkError
+        double networkOutputLayerError
     ) {
         int outputLayerIndex = layers.size() - 1;
         
         double layersNeuronErrors[][] = new double[layers.size()][];
-        layersNeuronErrors[outputLayerIndex] = new double[]{networkError};
+        layersNeuronErrors[outputLayerIndex] = new double[]{networkOutputLayerError};
         int firstHiddenLayerIndex = outputLayerIndex-1;
 
         for(int ind=firstHiddenLayerIndex ; ind>=0 ; ind--) {
@@ -84,13 +83,9 @@ public class NeuralNetwork {
     }
 
     private double getNetworkIterationError(
-        double desiredValue, double predictedValue
+        double networkOutputLayerError
     ) {
-        double outputLayerError = getNetworkOutputLayerError(
-            desiredValue, predictedValue
-        );
-
-        double parsedValuesDifference = Math.pow(outputLayerError, 2);
+        double parsedValuesDifference = Math.pow(networkOutputLayerError, 2);
         return parsedValuesDifference/2;
     }
 
@@ -99,14 +94,14 @@ public class NeuralNetwork {
             layers.get(0).setNeuronsInputs(trainingData.getInputForTraining());
             double predictedResult = executeNetworkIteration();
 
-            double networkError = getNetworkIterationError(
+            double networkOutputLayerError = getNetworkOutputLayerError(
                 trainingData.getExpectedResult(), predictedResult
             );
+            double networkError = getNetworkIterationError(
+                networkOutputLayerError
+            );
             if(networkError > TOLERANCE_RATE) {
-                handleAdjustNeuronsWeights(
-                    trainingData.getExpectedResult(), predictedResult,
-                    networkError
-                );
+                handleAdjustNeuronsWeights(networkOutputLayerError);
             }
         }
     }
