@@ -1,4 +1,4 @@
-package NetworkComponents;
+package networkComponents;
 
 public enum NeuralNetworkResult {
     FIRST_EXPECTED_VALUE,

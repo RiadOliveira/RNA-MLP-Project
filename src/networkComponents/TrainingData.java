@@ -1,4 +1,4 @@
-package NetworkComponents;
+package networkComponents;
 
 public class TrainingData {
     //Davi (2+1+2+1) = 6

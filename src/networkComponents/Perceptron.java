@@ -1,4 +1,4 @@
-package NetworkComponents;
+package networkComponents;
 
 import utils.UtilsFunctions;
 
