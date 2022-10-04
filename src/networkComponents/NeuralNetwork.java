@@ -43,7 +43,17 @@ public class NeuralNetwork {
         }
     }
 
-    private double executeNetworkIteration() {
+    public double verifyNetworkResultForInput(double input[][]) {
+        if(layers.size() == 0) {
+            System.out.println("A Rede não foi treinada!");
+            return 0;
+        }
+
+        layers.get(0).setNeuronsInputs(input);
+        return getNetworkIterationPredictedResult();
+    }
+
+    private double getNetworkIterationPredictedResult() {
         double neuronsResult[] = null;
 
         for(int ind=0 ; ind<layers.size() ; ind++) {
@@ -108,7 +118,7 @@ public class NeuralNetwork {
 
         for(TrainingData trainingData : trainingDatas) {
             layers.get(0).setNeuronsInputs(trainingData.getInputForTraining());
-            double predictedResult = executeNetworkIteration();
+            double predictedResult = getNetworkIterationPredictedResult();
 
             double networkOutputLayerError = getNetworkOutputLayerError(
                 trainingData.getExpectedResult(), predictedResult
