@@ -11,7 +11,7 @@ public class Perceptron {
         inputs = new double[inputsQuantity];
 
         for(int ind=0 ; ind<inputsQuantity ; ind++) {
-            double generatedValue = Math.random();
+            double generatedValue = Math.abs(Math.random() - 0.5);
             weights[ind] = ind % 2 == 0 ? generatedValue : -generatedValue;
         }
     }
