@@ -5,7 +5,7 @@ import java.util.List;
 import utils.UtilsFunctions;
 
 public class NeuralNetwork {
-    private List<TrainingData> trainingDatas;
+    private TrainingData[] trainingDatas;
 
     private final double LEARNING_RATE = 0.40;
     private final double TOLERANCE_RATE = 0.10;
