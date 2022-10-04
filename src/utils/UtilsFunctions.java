@@ -1,7 +1,7 @@
 package utils;
 
 public class UtilsFunctions {
-    private static final ActivationFunction ACTIVATION_FUNCTION_SELECTED = ActivationFunction.LINEAR;
+    public static final ActivationFunction ACTIVATION_FUNCTION_SELECTED = ActivationFunction.LINEAR;
 
     public static double activationFunction(double x) {
         switch(ACTIVATION_FUNCTION_SELECTED) {

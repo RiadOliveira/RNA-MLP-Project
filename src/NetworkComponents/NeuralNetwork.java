@@ -8,7 +8,7 @@ public class NeuralNetwork {
     private TrainingData[] trainingDatas;
 
     private final double LEARNING_RATE = 0.40;
-    private final double TOLERANCE_RATE = 0.00001;
+    private final double TOLERANCE_RATE = 0.10;
 
     private List<Layer> layers = new ArrayList<>();
     private int hiddenLayersQuantity;
@@ -25,7 +25,18 @@ public class NeuralNetwork {
         initializeNetworkLayers();
 
         for(int ind=0 ; ind<epochStopQuantity ; ind++) {
-            iterateThroughOneEpoch();
+            boolean hasLearned = iterateThroughOneEpochAndVerifyIfHasLearned();
+
+            if(hasLearned) {
+                System.out.println(
+                    "A rede " + (!hasLearned ? "não " : "") +
+                    "aprendeu com " + (ind+1) + " épocas, " +
+                    "utilizando a função de ativação " + UtilsFunctions.ACTIVATION_FUNCTION_SELECTED +
+                    ", taxa de aprendizado de " + LEARNING_RATE + " e tolerância de " +
+                    TOLERANCE_RATE + "." 
+                );
+                break;
+            }
         }
     }
 
@@ -89,7 +100,9 @@ public class NeuralNetwork {
         return parsedValuesDifference/2;
     }
 
-    private void iterateThroughOneEpoch() {
+    private boolean iterateThroughOneEpochAndVerifyIfHasLearned() {
+        boolean hasLearned = true;
+
         for(TrainingData trainingData : trainingDatas) {
             layers.get(0).setNeuronsInputs(trainingData.getInputForTraining());
             double predictedResult = executeNetworkIteration();
@@ -101,9 +114,12 @@ public class NeuralNetwork {
                 networkOutputLayerError
             );
             if(networkError > TOLERANCE_RATE) {
+                hasLearned = false;
                 handleAdjustNeuronsWeights(networkOutputLayerError);
             }
         }
+
+        return hasLearned;
     }
 
     private void initializeNewLayer(
