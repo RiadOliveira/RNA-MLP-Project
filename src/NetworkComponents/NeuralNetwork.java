@@ -25,9 +25,12 @@ public class NeuralNetwork {
         initializeNetworkLayers();
 
         for(int ind=0 ; ind<epochStopQuantity ; ind++) {
-            boolean hasLearned = iterateThroughOneEpochAndVerifyIfHasLearned();
+            boolean hasLearned = iterateThroughOneEpochAndVerifyIfHasLearned(false);
 
             if(hasLearned) {
+                iterateThroughOneEpochAndVerifyIfHasLearned(true);
+                System.out.println();
+
                 System.out.println(
                     "A rede " + (!hasLearned ? "não " : "") +
                     "aprendeu com " + (ind+1) + " épocas, " +
@@ -100,7 +103,7 @@ public class NeuralNetwork {
         return parsedValuesDifference/2;
     }
 
-    private boolean iterateThroughOneEpochAndVerifyIfHasLearned() {
+    private boolean iterateThroughOneEpochAndVerifyIfHasLearned(boolean showEpochResults) {
         boolean hasLearned = true;
 
         for(TrainingData trainingData : trainingDatas) {
@@ -116,6 +119,13 @@ public class NeuralNetwork {
             if(networkError > TOLERANCE_RATE) {
                 hasLearned = false;
                 handleAdjustNeuronsWeights(networkOutputLayerError);
+            }
+
+            if(showEpochResults) {
+                System.out.println(
+                    "Valor esperado: " + trainingData.getExpectedResult() +
+                    " | Valor obtido: " + predictedResult
+                );
             }
         }
 
