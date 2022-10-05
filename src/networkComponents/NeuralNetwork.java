@@ -8,7 +8,7 @@ public class NeuralNetwork {
     private List<TrainingData> trainingDatas;
 
     private final float LEARNING_RATE = 0.40f;
-    private final float TOLERANCE_RATE = 0.005f;
+    private final float TOLERANCE_RATE = 0.010f;
 
     private List<Layer> layers = new ArrayList<>();
     private int hiddenLayersQuantity;
