@@ -1,7 +1,5 @@
 import java.util.Scanner;
 
-import javax.swing.SwingConstants;
-
 import networkComponents.NeuralNetwork;
 
 public class Main {
@@ -12,36 +10,35 @@ public class Main {
         NeuralNetwork neuralNetwork = new NeuralNetwork(new int[]{5, 4, 3, 2, 1});
         neuralNetwork.executeNetworkLearning(10000);
 
-        // int test = 0;
-        // do {
-        //     System.out.println(
-        //         "[1] - Definir uma entrada para testar na MLP treinada;\n[0] - Parar"
-        //         );
-        //     test = scanner.nextInt();
-        //     if(test==1){
-        //         neuralNetwork.showNetworkResultForInput(inputForTestNeuralNetwork());
-        //     }
-        // } while (test != 0);
+        int response = 0;
+        do {
+            System.out.println(
+                "[1] - Definir uma entrada para testar na MLP treinada;\n[0] - Parar"
+                );
+            response = scanner.nextInt();
+            scanner.nextLine();
 
-        neuralNetwork.showNetworkResultForInput(inputForTestNeuralNetwork());
+            if(response == 1) {
+                float[][] input = inputForTestNeuralNetwork();
+                neuralNetwork.showNetworkResultForInput(input);
+                System.out.println();
+            }
+        } while (response != 0);
     }
 
-    //PEGA A STRING DIGITADA PELO USUARIO (EX: 01111000111010010110) E TRANSFORMA EM UMA MATRIZ
+    //IT GETS STRING INPUTED BY USER (EX: 0111 1000 1110 1001 0110) AND CONVERTS IT TO A MATRIX
     public static float[][] inputForTestNeuralNetwork(){
         System.out.println("Defina a entrada: ");
-        String stringForMatriz = scanner.nextLine();
-
         float[][] matrizResult = new float[5][4];
 
-        int cont = 0;
         for(int i=0; i<5; i++){
+            String stringForMatriz = scanner.nextLine();
+
             for(int j=0; j<4; j++){
-                matrizResult[i][j] = stringForMatriz.charAt(cont);
-                cont++;
+                matrizResult[i][j] = Float.parseFloat("" + stringForMatriz.charAt(j));
             }
         }
         
         return matrizResult;
-
     }
 }
